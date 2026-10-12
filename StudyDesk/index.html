@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>StudyDesk - an adaptive interface demo</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>StudyDesk</h1>
+      <p class="tagline">A small study dashboard that learns how you use it.</p>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="adaptToggle" checked>
+      <span>Adapt to my behavior</span>
+    </label>
+  </header>
+
+  <main class="layout">
+    <section class="panel" aria-labelledby="actionsHeading">
+      <h2 id="actionsHeading" class="visually-hidden">Actions</h2>
+
+      <div id="suggestion" class="suggestion" aria-live="polite" hidden></div>
+
+      <div id="promotedBlock" class="block" hidden>
+        <h3>Your most used</h3>
+        <div id="promotedRow" class="grid grid-promoted"></div>
+      </div>
+
+      <div class="block">
+        <h3>All actions</h3>
+        <div id="actionGrid" class="grid" data-hit-zone></div>
+        <p class="hint">Order here never changes, so you can always find things in the same place.</p>
+      </div>
+
+      <div class="block workspace" aria-live="polite">
+        <h3>Workspace</h3>
+        <div id="workspace" class="workspace-body">
+          <p>Pick an action above. Each click teaches the interface a little about you.</p>
+        </div>
+      </div>
+    </section>
+
+    <aside class="panel model" aria-labelledby="modelHeading">
+      <h2 id="modelHeading">What the interface has learned</h2>
+
+      <div class="block">
+        <h3>Usage scores</h3>
+        <div id="scoreBars" class="bars"></div>
+      </div>
+
+      <div class="block">
+        <h3>Pointer accuracy</h3>
+        <p id="pointerStatus" class="stat"></p>
+      </div>
+
+      <div class="block">
+        <h3>Why things changed</h3>
+        <ol id="eventLog" class="event-log"><li class="muted">Nothing yet.</li></ol>
+      </div>
+
+      <div class="block controls">
+        <h3>Try it quickly</h3>
+        <button type="button" id="simRoutine" class="btn">Simulate a study routine</button>
+        <button type="button" id="simShaky" class="btn">Simulate missed clicks</button>
+        <button type="button" id="resetBtn" class="btn btn-quiet">Reset what it learned</button>
+      </div>
+    </aside>
+  </main>
+
+  <script src="js/model.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
