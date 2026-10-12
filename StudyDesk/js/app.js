@@ -22,6 +22,8 @@
     { id: "papers", label: "Find papers", icon: "\uD83D\uDD0E", blurb: "Search journals and your saved sources." },
     { id: "flashcards", label: "Flashcards", icon: "\uD83C\uDCCF", blurb: "Review terms before the quiz." },
     { id: "timer", label: "Focus timer", icon: "\u23F1\uFE0F", blurb: "Start a 25 minute focus block." },
+    { id: "homework", label: "Homework", icon: "\uD83D\uDCCB", blurb: "See what is due and submit your work." },
+    { id: "reading", label: "Reading list", icon: "\uD83D\uDCDA", blurb: "Pick up the next paper on your list." },
     { id: "export", label: "Export", icon: "\uD83D\uDCE4", blurb: "Save your notes as a document." },
     { id: "settings", label: "Settings", icon: "\u2699\uFE0F", blurb: "Change how StudyDesk looks and behaves." },
   ];
@@ -53,7 +55,7 @@
         STORAGE_KEY,
         JSON.stringify({
           usage: { scores: usage.scores, counts: usage.counts },
-          sequence: { transitions: sequence.transitions, last: sequence.last },
+          sequence: { transitions: sequence.transitions, last: sequence.last, dismissals: sequence.dismissals },
           pointer: { samples: pointer.samples, missRate: pointer.missRate, level: pointer.level },
           promotedIds,
         })
@@ -71,6 +73,7 @@
       Object.assign(usage.counts, saved.usage.counts);
       sequence.transitions = saved.sequence.transitions || {};
       sequence.last = saved.sequence.last || null;
+      sequence.dismissals = saved.sequence.dismissals || {};
       Object.assign(pointer, saved.pointer);
       promotedIds = (saved.promotedIds || []).filter((id) => IDS.includes(id));
     } catch (err) {
@@ -140,7 +143,12 @@
     btn.dataset.id = suggestionId;
     btn.dataset.suggested = "true";
     btn.textContent = `Open ${byId[suggestionId].label}`;
-    box.replaceChildren(text, btn);
+    const notNow = document.createElement("button");
+    notNow.type = "button";
+    notNow.className = "btn btn-quiet";
+    notNow.dataset.dismiss = "true";
+    notNow.textContent = "Not now";
+    box.replaceChildren(text, btn, notNow);
     box.hidden = false;
   }
 
@@ -272,10 +280,20 @@
 
   $("suggestion").addEventListener("click", (event) => {
     const btn = event.target.closest("button");
-    if (btn && !busy) {
-      onPointer(true);
-      onAction(btn.dataset.id, { fromSuggestion: true });
+    if (!btn || busy) return;
+    if (btn.dataset.dismiss) {
+      // Easy dismissal: the person can reject a suggestion, and the model learns from it.
+      const rejected = suggestionId;
+      sequence.dismiss(rejected);
+      const guess = sequence.predict();
+      suggestionId = guess ? guess.id : null;
+      addLog(`You dismissed the suggestion ${byId[rejected].label}. It will be suggested less often.`);
+      renderAll();
+      save();
+      return;
     }
+    onPointer(true);
+    onAction(btn.dataset.id, { fromSuggestion: true });
   });
 
   $("adaptToggle").addEventListener("change", (event) => {

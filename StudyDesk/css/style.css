@@ -91,7 +91,7 @@ body {
   background: var(--amber-soft); border: 1px solid #e0c56b; border-radius: 8px;
 }
 .suggestion[hidden], #promotedBlock[hidden] { display: none; }
-.suggestion .btn { margin-left: auto; }
+.suggestion span + .btn { margin-left: auto; }
 
 .btn {
   font: inherit; font-weight: 600; color: #fff; background: var(--teal);

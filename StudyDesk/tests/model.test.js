@@ -72,6 +72,28 @@ test("SequenceModel: probabilities sum to 1", () => {
   assert.ok(Math.abs(total - 1) < 1e-9);
 });
 
+test("SequenceModel: dismissing a suggestion lowers it until it stops appearing", () => {
+  const m = new SequenceModel(IDS);
+  for (let i = 0; i < 5; i++) ["a", "b", "c"].forEach((id) => m.record(id));
+  m.record("a");
+  const before = m.predict();
+  assert.strictEqual(before.id, "b");
+  m.dismiss("b");
+  const afterOne = m.distribution().b;
+  assert.ok(afterOne < before.confidence, "one dismissal should lower confidence");
+  m.dismiss("b");
+  m.dismiss("b");
+  assert.strictEqual(m.predict(), null, "three dismissals should silence it");
+});
+
+test("SequenceModel: probabilities still sum to 1 after dismissals", () => {
+  const m = new SequenceModel(IDS);
+  ["a", "b", "a", "b", "a", "c", "a"].forEach((id) => m.record(id));
+  m.dismiss("b");
+  const total = Object.values(m.distribution()).reduce((s, p) => s + p, 0);
+  assert.ok(Math.abs(total - 1) < 1e-9);
+});
+
 test("PointerModel: accurate clicking keeps buttons at normal size", () => {
   const m = new PointerModel();
   for (let i = 0; i < 30; i++) m.record(true);

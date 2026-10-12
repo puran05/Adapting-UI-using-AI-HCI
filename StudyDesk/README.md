@@ -18,7 +18,7 @@ node tests/model.test.js
 | Adaptation | Learning method | What the user sees |
 |---|---|---|
 | Frequently used actions | Recency-weighted frequency scores with hysteresis | A "Your most used" row of up to 3 buttons. The main grid never reorders. |
-| Next-action suggestion | First-order Markov chain with Laplace smoothing | A "Next up?" card, shown only when the model is confident. |
+| Next-action suggestion | First-order Markov chain with Laplace smoothing | A "Next up?" card, shown only when the model is confident. Pressing "Not now" teaches it to suggest that action less. |
 | Button size | Moving average of missed clicks | Buttons grow to 120% or 140% when many clicks land in the gaps. |
 
 Every change is listed under "Why things changed", and the "Adapt to my behavior" switch turns all adaptation off.
@@ -38,7 +38,7 @@ index.html          page structure
 css/style.css       styles; button size follows the --target-scale variable
 js/model.js         the three learning models (works in browser and Node)
 js/app.js           connects the models to the page and explains each change
-tests/model.test.js 11 unit tests for the models
+tests/model.test.js 13 unit tests for the models
 docs/               screenshots and figures used in the report
 ```
 

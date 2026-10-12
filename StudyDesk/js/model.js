@@ -83,6 +83,17 @@
       this.alpha = alpha; // Laplace smoothing so unseen transitions are not 0%
       this.transitions = {};
       this.last = null;
+      // Dismissals: how many times the person said "not now" to a suggestion
+      // (from -> to). Each one cancels `dismissPenalty` observed transitions.
+      this.dismissals = {};
+      this.dismissPenalty = 2;
+    }
+
+    /** The person rejected the suggestion "to" after "from". Suggest it less. */
+    dismiss(to, from = this.last) {
+      if (from === null || !this.ids.includes(to)) return;
+      const row = (this.dismissals[from] ||= {});
+      row[to] = (row[to] || 0) + 1;
     }
 
     record(id) {
@@ -103,11 +114,14 @@
     distribution(from = this.last) {
       if (from === null) return {};
       const row = this.transitions[from] || {};
-      const total = this.observationsFrom(from);
-      const denom = total + this.alpha * this.ids.length;
-      return Object.fromEntries(
-        this.ids.map((id) => [id, ((row[id] || 0) + this.alpha) / denom])
+      const rejected = this.dismissals[from] || {};
+      // Observed counts minus the weight of any dismissals (never below zero).
+      const counts = Object.fromEntries(
+        this.ids.map((id) => [id, Math.max(0, (row[id] || 0) - this.dismissPenalty * (rejected[id] || 0))])
       );
+      const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+      const denom = total + this.alpha * this.ids.length;
+      return Object.fromEntries(this.ids.map((id) => [id, (counts[id] + this.alpha) / denom]));
     }
 
     /**
